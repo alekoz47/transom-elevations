@@ -3,7 +3,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-# input image and convert to hsv and gray
 img = cv2.imread("../images/frame0.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
@@ -31,7 +30,6 @@ mask = cv2.inRange(hsv, lower_range, upper_range)
 # crop image to only include stern + wave
 crop = mask[150:700, 500:1350]
 
-# display cropped and masked image
 cv2.imshow("crop", crop)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
