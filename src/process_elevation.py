@@ -5,7 +5,36 @@ import matplotlib.pyplot as plt
 
 #read image
 img = cv2.imread("../images/frame0.jpg")
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+
+lower_range = np.array([20,100,50])
+upper_range = np.array([60,242,215])
+
+mask = cv2.inRange(hsv, lower_range, upper_range)
+
+# testing color filter with waves
+"""
+img1 = cv2.imread("../images/frame1000.jpg")
+img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
+gray1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
+hsv1 = cv2.cvtColor(img1, cv2.COLOR_RGB2HSV)
+mask1 = cv2.inRange(hsv1, lower_range, upper_range)
+
+cv2.imshow("mask", mask)
+cv2.imshow("mask1", mask1)
+if cv2.waitKey(0) & 0xff == 27:
+    cv2.destroyAllWindows()
+"""
+
+plt.subplot(121),plt.imshow(mask)
+plt.subplot(122),plt.imshow(edges)
+plt.show()
+
+cv2.imshow("edges", edges)
+if cv2.waitKey(0) & 0xff == 27:
+    cv2.destroyAllWindows()
 
 """
 ######## Find Corners #########
@@ -16,11 +45,9 @@ dst = cv2.cornerHarris(gray, 2, 3, 0.04)
 #threshold for optimal value
 img[dst > 0.01 * dst.max()] = [0, 0, 255]
 
-
 cv2.imshow("dst", img)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
-
 
 ######## Transform Image #########
 
@@ -44,19 +71,14 @@ plt.show()
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
 
-"""
 ######## Recognize Grid ########
-    
+
+# "crop" image to outside border of transom stern
+
 blur = cv2.GaussianBlur(gray, (5,5), 0)
-cv2.imshow("blur", blur)
-
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
-cv2.imshow("thresh", thresh)
-
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
     
-im2, contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 best_cnt = contours[0]
     
 max_area = 0
@@ -73,7 +95,26 @@ for i in contours:
 mask = np.zeros((gray.shape), np.uint8)
 cv2.drawContours(mask, [best_cnt], 0, 255, -1)
 cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-cv2.imshow("mask", mask)
 
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
+# deal with the "cropped" image
+
+out = np.zeros_like(gray)
+out[mask == 255] = gray[mask == 255]
+
+blur = cv2.GaussianBlur(out, (5,5), 0)
+thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
+
+contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+c = 0
+for i in contours:
+        area = cv2.contourArea(i)
+        if area > 1000/2:
+            cv2.drawContours(image, contours, c, (0, 255, 0), 3)
+        c+=1
+    
+plt.subplot(221),plt.imshow(thresh),plt.title("threshold")
+plt.subplot(222),plt.imshow(mask),plt.title("mask")
+plt.subplot(223),plt.imshow(image),plt.title("final")
+plt.show()
+"""
