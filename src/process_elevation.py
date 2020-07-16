@@ -30,58 +30,24 @@ mask = cv2.inRange(hsv, lower_range, upper_range)
 # crop image to only include stern + wave
 crop = mask[150:700, 500:1350]
 
+"""
 cv2.imshow("crop", crop)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
-plt.subplot(111),plt.imshow(crop)
-plt.show()
-
-
-
-######## testing ideas ########
 """
-######## Find Corners #########
 
-gray = np.float32(gray)
-#result is dilated for marking corners
-dst = cv2.cornerHarris(gray, 2, 3, 0.04)
-#threshold for optimal value
-img[dst > 0.01 * dst.max()] = [0, 0, 255]
 
-cv2.imshow("dst", img)
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
-
-######## Transform Image #########
-
-rows,cols,ch = img.shape
-
-#original boundary points
-pts1 = np.float32([[56,65],[368,52],[28,387],[389,390]])
-#new boundary points (rectangle)
-pts2 = np.float32([[0,0],[300,0],[0,300],[300,300]])
-
-M = cv2.getPerspectiveTransform(pts1,pts2)
-
-#300,300 is sizing of final image
-dst = cv2.warpPerspective(img,M,(300,300))
-
-plt.subplot(221),plt.imshow(img),plt.title("Input")
-plt.subplot(222),plt.imshow(gray),plt.title("Grayscale")
-plt.subplot(223),plt.imshow(dst),plt.title("Output")
-plt.show()
-
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
 
 ######## Recognize Grid ########
 
-# "crop" image to outside border of transom stern
-
+gray = crop
+final = proj[150:700, 500:1350]
 blur = cv2.GaussianBlur(gray, (5,5), 0)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
-    
-contours, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+contours, hierarchy = cv2.findContours(thresh,
+                                       cv2.RETR_TREE,
+                                       cv2.CHAIN_APPROX_SIMPLE)
 best_cnt = contours[0]
     
 max_area = 0
@@ -99,25 +65,25 @@ mask = np.zeros((gray.shape), np.uint8)
 cv2.drawContours(mask, [best_cnt], 0, 255, -1)
 cv2.drawContours(mask, [best_cnt], 0, 0, 2)
 
-# deal with the "cropped" image
-
 out = np.zeros_like(gray)
 out[mask == 255] = gray[mask == 255]
 
 blur = cv2.GaussianBlur(out, (5,5), 0)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 
-contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours, _ = cv2.findContours(thresh,
+                               cv2.RETR_TREE,
+                               cv2.CHAIN_APPROX_SIMPLE)
 
 c = 0
 for i in contours:
         area = cv2.contourArea(i)
         if area > 1000/2:
-            cv2.drawContours(image, contours, c, (0, 255, 0), 3)
+            cv2.drawContours(final, contours, c, (0, 255, 0), 3)
         c+=1
     
 plt.subplot(221),plt.imshow(thresh),plt.title("threshold")
 plt.subplot(222),plt.imshow(mask),plt.title("mask")
-plt.subplot(223),plt.imshow(image),plt.title("final")
+plt.subplot(223),plt.imshow(final),plt.title("final")
+plt.subplot(224),plt.imshow(crop),plt.title("cropped")
 plt.show()
-"""
