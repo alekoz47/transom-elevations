@@ -3,39 +3,39 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-#read image
+# input image and convert to hsv and gray
 img = cv2.imread("../images/frame0.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
+#np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
+#project image to vertical plane
+initial_rect = np.float32([[732, 480],
+                           [1151, 483],
+                           [1144, 576],
+                           [741, 572]])
+final_rect = np.float32([[732, 480],
+                         [1151, 480],
+                         [1151, 576],
+                         [732, 576]])
+matrix = cv2.getPerspectiveTransform(initial_rect,final_rect)
+proj = cv2.warpPerspective(img, matrix, (1920, 1080))
+
+# hide everything but stern (based on yellow)
+hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
 lower_range = np.array([20,100,50])
 upper_range = np.array([60,242,215])
-
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
-# testing color filter with waves
-"""
-img1 = cv2.imread("../images/frame1000.jpg")
-img1 = cv2.cvtColor(img1, cv2.COLOR_BGR2RGB)
-gray1 = cv2.cvtColor(img1, cv2.COLOR_RGB2GRAY)
-hsv1 = cv2.cvtColor(img1, cv2.COLOR_RGB2HSV)
-mask1 = cv2.inRange(hsv1, lower_range, upper_range)
-
 cv2.imshow("mask", mask)
-cv2.imshow("mask1", mask1)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
-"""
 
-plt.subplot(121),plt.imshow(mask)
-plt.subplot(122),plt.imshow(edges)
+plt.subplot(111),plt.imshow(mask)
 plt.show()
 
-cv2.imshow("edges", edges)
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
 
+
+# testing ideas
 """
 ######## Find Corners #########
 
