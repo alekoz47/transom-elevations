@@ -8,7 +8,9 @@ img = cv2.imread("../images/frame0.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
-#project image to vertical plane
+# project image to vertical plane
+#   this is based on first frame of TR5-R1.94A1V
+#   based on camera position, this shouldn't change between runs
 initial_rect = np.float32([[732, 480],
                            [1151, 483],
                            [1144, 576],
@@ -17,7 +19,7 @@ final_rect = np.float32([[732, 480],
                          [1151, 480],
                          [1151, 576],
                          [732, 576]])
-matrix = cv2.getPerspectiveTransform(initial_rect,final_rect)
+matrix = cv2.getPerspectiveTransform(initial_rect, final_rect)
 proj = cv2.warpPerspective(img, matrix, (1920, 1080))
 
 # hide everything but stern (based on yellow)
@@ -26,16 +28,19 @@ lower_range = np.array([20,100,50])
 upper_range = np.array([60,242,215])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
-cv2.imshow("mask", mask)
+# crop image to only include stern + wave
+crop = mask[150:700, 500:1350]
+
+# display cropped and masked image
+cv2.imshow("crop", crop)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
-
-plt.subplot(111),plt.imshow(mask)
+plt.subplot(111),plt.imshow(crop)
 plt.show()
 
 
 
-# testing ideas
+######## testing ideas ########
 """
 ######## Find Corners #########
 
