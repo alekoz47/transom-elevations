@@ -113,6 +113,11 @@ cv2.drawContours(final, [waterline_contour], 0, 0, 2)
 
 # find top corners of transom
 tl_dist = sorted(transom_contour,
-                 key=lambda r: r[0][0])[0]
+                 key=lambda r: r[0][0])[0][0]
 tr_dist = sorted(transom_contour,
-                 key=lambda r: r[0][1])[0]
+                 key=lambda r: r[0][0])[len(transom_contour) -1][0]
+print(tl_dist)
+print(tr_dist)
+
+# split vessel into buttocks
+# use lambda to make line between corners
