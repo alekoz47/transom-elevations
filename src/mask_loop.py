@@ -30,7 +30,7 @@ def find_mask(image_name):
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
     # crop image to only include stern + wave
-    crop = mask[150:700, 500:1350]
+    crop = mask[150:800, 500:1350]
     
     ######## Recognize Grid ########
     
