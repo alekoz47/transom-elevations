@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread("../images/frame596.jpg")
+img = cv2.imread("../images/frame433.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
@@ -21,16 +21,24 @@ final_rect = np.float32([[732, 480],
 matrix = cv2.getPerspectiveTransform(initial_rect, final_rect)
 proj = cv2.warpPerspective(img, matrix, (1920, 1080))
 
-######## Recognize Stern ########
-
 # hide everything but stern (based on yellow)
 hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
-lower_range = np.array([20,100,50])
-upper_range = np.array([60,242,215])
+lower_range = np.array([29,225,115])
+upper_range = np.array([60,255,255])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
 # crop image to only include stern + wave
 crop = mask[150:800, 500:1350]
+
+
+cv2.imshow("crop", crop)
+if cv2.waitKey(0) & 0xff == 27:
+    cv2.destroyAllWindows()
+
+plt.subplot(111),plt.imshow(crop),plt.title("test")
+
+
+######## Recognize Grid ########
 
 gray = crop
 final = proj[150:800, 500:1350]
@@ -56,47 +64,23 @@ for i in contours:
 mask = np.zeros((gray.shape), np.uint8)
 cv2.drawContours(mask, [best_cnt], 0, 255, -1)
 cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-transom_contour = best_cnt
 
-######## Recognize Waterline #########
-# this section has a lot of reused code
+out = np.zeros_like(gray)
+out[mask == 255] = gray[mask == 255]
 
-# hide everything but waterline (based on green)
-lower_range = np.array([28,225,115])
-upper_range = np.array([60,255,255])
-mask = cv2.inRange(hsv, lower_range, upper_range)
-
-# crop image to only include stern + wave
-crop = mask[150:800, 500:1350]
-
-gray = crop
-blur = cv2.GaussianBlur(gray, (5,5), 0)
+blur = cv2.GaussianBlur(out, (5,5), 0)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 
-contours, hierarchy = cv2.findContours(thresh,
-                                       cv2.RETR_TREE,
-                                       cv2.CHAIN_APPROX_SIMPLE)
-best_cnt = contours[0]
-    
-max_area = 0
+contours, _ = cv2.findContours(thresh,
+                               cv2.RETR_TREE,
+                               cv2.CHAIN_APPROX_SIMPLE)
+
 c = 0
 for i in contours:
-    area = cv2.contourArea(i)
-    if area > 1000:
-        if area > max_area:
-            max_area = area
-            best_cnt = i
-            image = cv2.drawContours(img, contours, c, (0, 255, 0), 3)
-    c += 1
-
-mask = np.zeros((gray.shape), np.uint8)
-cv2.drawContours(mask, [best_cnt], 0, 255, -1)
-cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-waterline_contour = best_cnt
-
-final = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
-cv2.drawContours(final, [transom_contour], 0, 0, 2)
-cv2.drawContours(final, [waterline_contour], 0, 0, 2)
+        area = cv2.contourArea(i)
+        if area > 1000/2:
+            cv2.drawContours(final, contours, c, (0, 255, 0), 3)
+        c+=1
     
 plt.subplot(221),plt.imshow(thresh),plt.title("threshold")
 plt.subplot(222),plt.imshow(mask),plt.title("mask")
@@ -104,6 +88,6 @@ plt.subplot(223),plt.imshow(final),plt.title("final")
 plt.subplot(224),plt.imshow(crop),plt.title("cropped")
 plt.show()
 
-cv2.imshow("final", final)
+cv2.imshow("crop", thresh)
 if cv2.waitKey(0) & 0xff == 27:
     cv2.destroyAllWindows()
