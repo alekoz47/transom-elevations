@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread("../images/frame596.jpg")
+img = cv2.imread("../images/frame0.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
@@ -21,7 +21,9 @@ final_rect = np.float32([[732, 480],
 matrix = cv2.getPerspectiveTransform(initial_rect, final_rect)
 proj = cv2.warpPerspective(img, matrix, (1920, 1080))
 
+
 ######## Recognize Stern ########
+
 
 # hide everything but stern (based on yellow)
 hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
@@ -40,9 +42,8 @@ thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 contours, hierarchy = cv2.findContours(thresh,
                                        cv2.RETR_TREE,
                                        cv2.CHAIN_APPROX_SIMPLE)
+# TODO: replace this with sort function lambda: cv2.contourArea()
 best_cnt = contours[0]
-    
-# TODO: replace this with sort function with lambda: cv2.contourArea()
 max_area = 0
 c = 0
 for i in contours:
@@ -57,10 +58,12 @@ for i in contours:
 mask = np.zeros((gray.shape), np.uint8)
 cv2.drawContours(mask, [best_cnt], 0, 255, -1)
 cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-transom_contour = best_cnt
+transom_contour = best_cnt # save for later
+
 
 ######## Recognize Waterline #########
 # this section has a lot of reused code
+
 
 # hide everything but waterline (based on green)
 lower_range = np.array([29,225,115])
@@ -78,7 +81,6 @@ contours, hierarchy = cv2.findContours(thresh,
                                        cv2.RETR_TREE,
                                        cv2.CHAIN_APPROX_SIMPLE)
 best_cnt = contours[0]
-    
 max_area = 0
 c = 0
 for i in contours:
@@ -98,13 +100,19 @@ waterline_contour = best_cnt
 final = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
 cv2.drawContours(final, [transom_contour], 0, 0, 2)
 cv2.drawContours(final, [waterline_contour], 0, 0, 2)
-    
-plt.subplot(221),plt.imshow(thresh),plt.title("threshold")
-plt.subplot(222),plt.imshow(mask),plt.title("mask")
-plt.subplot(223),plt.imshow(final),plt.title("final")
-plt.subplot(224),plt.imshow(crop),plt.title("cropped")
-plt.show()
 
-cv2.imshow("final", final)
-if cv2.waitKey(0) & 0xff == 27:
-    cv2.destroyAllWindows()
+
+######## Locate Coordinates ########
+
+
+# we have waterline_contour and transom_contour
+#   find top left and right corners of transom
+#   split vessel into buttocks
+#   find most vertical waterline point at each buttock
+#   scale and find coordinates of waterline relative to transom
+
+# find top corners of transom
+tl_dist = sorted(transom_contour,
+                 key=lambda r: r[0][0])[0]
+tr_dist = sorted(transom_contour,
+                 key=lambda r: r[0][1])[0]
