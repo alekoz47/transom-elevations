@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread("../images/frame0.jpg")
+img = cv2.imread("../images/frame1000.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
@@ -23,6 +23,8 @@ proj = cv2.warpPerspective(img, matrix, (1920, 1080))
 
 # hide everything but stern (based on yellow)
 hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
+#lower_range = np.array([20,100,50])
+#upper_range = np.array([60,242,215])
 lower_range = np.array([20,100,50])
 upper_range = np.array([60,242,215])
 mask = cv2.inRange(hsv, lower_range, upper_range)
