@@ -42,6 +42,7 @@ contours, hierarchy = cv2.findContours(thresh,
                                        cv2.CHAIN_APPROX_SIMPLE)
 best_cnt = contours[0]
     
+# TODO: replace this with sort function with lambda: cv2.contourArea()
 max_area = 0
 c = 0
 for i in contours:
@@ -62,7 +63,7 @@ transom_contour = best_cnt
 # this section has a lot of reused code
 
 # hide everything but waterline (based on green)
-lower_range = np.array([28,225,115])
+lower_range = np.array([29,225,115])
 upper_range = np.array([60,255,255])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
