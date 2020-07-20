@@ -27,8 +27,8 @@ def find_mask(image_name):
     
     # hide everything but stern (based on yellow)
     hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
-    lower_range = np.array([20,100,50])
-    upper_range = np.array([60,242,215])
+    lower_range = np.array([26,150,130])
+    upper_range = np.array([40,255,224])
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
     # crop image to only include stern + wave
@@ -52,7 +52,6 @@ def find_mask(image_name):
             if area > max_area:
                 max_area = area
                 best_cnt = i
-                image = cv2.drawContours(img, contours, c, (0, 255, 0), 3)
         c += 1
     
     mask = np.zeros((gray.shape), np.uint8)
@@ -67,8 +66,8 @@ def find_mask(image_name):
     # this section has a lot of reused code
     
     # hide everything but waterline (based on green)
-    lower_range = np.array([29,225,115])
-    upper_range = np.array([60,255,255])
+    lower_range = np.array([29,204,105])
+    upper_range = np.array([40,255,224])
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
     # crop image to only include stern + wave
@@ -91,7 +90,6 @@ def find_mask(image_name):
             if area > max_area:
                 max_area = area
                 best_cnt = i
-                image = cv2.drawContours(img, contours, c, (0, 255, 0), 3)
         c += 1
     
     mask = np.zeros((gray.shape), np.uint8)

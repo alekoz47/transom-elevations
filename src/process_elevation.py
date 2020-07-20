@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread("../images/frame0.jpg")
+img = cv2.imread("../images/frame600.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
@@ -27,8 +27,8 @@ proj = cv2.warpPerspective(img, matrix, (1920, 1080))
 
 # hide everything but stern (based on yellow)
 hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
-lower_range = np.array([20,100,50])
-upper_range = np.array([60,242,215])
+lower_range = np.array([26,150,130])
+upper_range = np.array([30,255,215])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
 # crop image to only include stern + wave
@@ -66,8 +66,8 @@ transom_contour = best_cnt # save for later
 
 
 # hide everything but waterline (based on green)
-lower_range = np.array([29,225,115])
-upper_range = np.array([60,255,255])
+lower_range = np.array([29,204,105])
+upper_range = np.array([40,255,224])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
 # crop image to only include stern + wave
@@ -110,14 +110,47 @@ cv2.drawContours(final, [waterline_contour], 0, 0, 2)
 #   split vessel into buttocks
 #   find most vertical waterline point at each buttock
 #   scale and find coordinates of waterline relative to transom
+# TODO: check corner points with transom and wave
 
 # find top corners of transom
-tl_dist = sorted(transom_contour,
+transom_tl = sorted(transom_contour,
                  key=lambda r: r[0][0])[0][0]
-tr_dist = sorted(transom_contour,
+transom_tr = sorted(transom_contour,
                  key=lambda r: r[0][0])[len(transom_contour) -1][0]
-print(tl_dist)
-print(tr_dist)
+print(transom_tl)
+print(transom_tr)
+
+#find edges of waterline
+waterline_l = sorted(waterline_contour,
+                 key=lambda r: r[0][0])[0][0][0]
+waterline_r = sorted(waterline_contour,
+                 key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
+print(waterline_l)
+print(waterline_r)
 
 # split vessel into buttocks
-# use lambda to make line between corners
+waterline_span = waterline_r - waterline_r
+buttocks = []
+for b in range(7):
+    buttocks.append(waterline_l + (b / 6) * (waterline_r - waterline_l))
+print(buttocks)
+
+# find raw wave heights
+raw_wave_heights = []
+wave_contour_bounds = []
+for x in buttocks:
+    wave_contour_bounds = sorted(waterline_contour,
+                                 key=lambda r: abs(x - r[0][0]))[:5]
+    raw_wave_heights.append(min(wave_contour_bounds,
+                                key=lambda r: r[0][1])[0][1])
+print(raw_wave_heights)
+
+# find scaled wave heights
+wave_points = np.int32([np.int32([buttocks[i],
+                                  raw_wave_heights[i]]) for i in range(7)])
+# beam is 0.23 m
+# top to waterline is 0.09 m
+
+final = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
+plt.subplot(111),plt.imshow(final),plt.title("final")
+plt.show()

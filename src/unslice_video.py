@@ -4,7 +4,7 @@ import os
 from os.path import isfile, join
 
 path_in = "../images/testing/test0/"
-path_out = "../videos/testing/video2.mp4"
+path_out = "../videos/testing/video4.mp4"
 fps = 60
 
 frame_array = []
@@ -12,7 +12,6 @@ files = [f for f in os.listdir(path_in) if isfile(join(path_in, f))]
 
 #sort file names properly
 files.sort(key = lambda x: x[5:-4])
-files.sort()
 
 for i in range(len(files)):
     filename = path_in + files[i]
