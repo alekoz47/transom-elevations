@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 
-img = cv2.imread("../images/frame600.jpg")
+img = cv2.imread("../images/frame1350.jpg")
 img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 #np.savetxt("test1.csv", img.split()[0], delimiter=',')
 
@@ -144,13 +144,18 @@ for x in buttocks:
     raw_wave_heights.append(min(wave_contour_bounds,
                                 key=lambda r: r[0][1])[0][1])
 print(raw_wave_heights)
+#wave_points = np.int32([np.int32([buttocks[i], raw_wave_heights[i]]) for i in range(7)])
 
 # find scaled wave heights
-wave_points = np.int32([np.int32([buttocks[i],
-                                  raw_wave_heights[i]]) for i in range(7)])
-# beam is 0.23 m
-# top to waterline is 0.09 m
+# may replace this code if I get sizing of grid
+scale = 0.23 / (transom_tr[0] - transom_tl[0]) # beam is 0.23 m
+transom_height = (transom_tr[1] + transom_tl[1]) / 2
+transom_to_waterline = 0.09 / scale # top to design waterline is 0.09 m
 
-final = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
-plt.subplot(111),plt.imshow(final),plt.title("final")
+unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
+                         for h in raw_wave_heights]
+wave_heights = [-h * scale for h in unscaled_wave_heights]
+print(wave_heights)
+
+plt.subplot(111),plt.imshow(final)
 plt.show()
