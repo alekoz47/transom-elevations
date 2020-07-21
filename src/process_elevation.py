@@ -117,23 +117,18 @@ transom_tl = sorted(transom_contour,
                  key=lambda r: r[0][0])[0][0]
 transom_tr = sorted(transom_contour,
                  key=lambda r: r[0][0])[len(transom_contour) -1][0]
-print(transom_tl)
-print(transom_tr)
 
 #find edges of waterline
 waterline_l = sorted(waterline_contour,
                  key=lambda r: r[0][0])[0][0][0]
 waterline_r = sorted(waterline_contour,
                  key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
-print(waterline_l)
-print(waterline_r)
 
 # split vessel into buttocks
 waterline_span = waterline_r - waterline_r
 buttocks = []
 for b in range(7):
     buttocks.append(waterline_l + (b / 6) * (waterline_r - waterline_l))
-print(buttocks)
 
 # find raw wave heights
 raw_wave_heights = []
@@ -143,7 +138,6 @@ for x in buttocks:
                                  key=lambda r: abs(x - r[0][0]))[:5]
     raw_wave_heights.append(min(wave_contour_bounds,
                                 key=lambda r: r[0][1])[0][1])
-print(raw_wave_heights)
 #wave_points = np.int32([np.int32([buttocks[i], raw_wave_heights[i]]) for i in range(7)])
 
 # find scaled wave heights
@@ -155,7 +149,6 @@ transom_to_waterline = 0.09 / scale # top to design waterline is 0.09 m
 unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                          for h in raw_wave_heights]
 wave_heights = [-h * scale for h in unscaled_wave_heights]
-print(wave_heights)
 
 plt.subplot(111),plt.imshow(final)
 plt.show()
