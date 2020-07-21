@@ -4,7 +4,7 @@ import os
 from os.path import isfile, join
 
 path_in = "../images/testing/test0/"
-path_out = "../videos/testing/video4.mp4"
+path_out = "../videos/testing/video5.mp4"
 fps = 60
 
 frame_array = []

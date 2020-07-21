@@ -125,10 +125,10 @@ waterline_r = sorted(waterline_contour,
                  key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
 
 # split vessel into buttocks
-waterline_span = waterline_r - waterline_r
+waterline_span = waterline_r - waterline_l
 buttocks = []
 for b in range(7):
-    buttocks.append(waterline_l + (b / 6) * (waterline_r - waterline_l))
+    buttocks.append(waterline_l + (b / 6) * waterline_span)
 
 # find raw wave heights
 raw_wave_heights = []
