@@ -35,7 +35,7 @@ mask = cv2.inRange(hsv, lower_range, upper_range)
 crop = mask[150:800, 500:1350]
 
 gray = crop
-final = proj[150:800, 500:1350]
+final = proj[150:800, 500:1450]
 blur = cv2.GaussianBlur(gray, (5,5), 0)
 thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
 
@@ -71,7 +71,7 @@ upper_range = np.array([40,255,224])
 mask = cv2.inRange(hsv, lower_range, upper_range)
 
 # crop image to only include stern + wave
-crop = mask[150:800, 500:1350]
+crop = mask[150:800, 500:1450]
 
 gray = crop
 blur = cv2.GaussianBlur(gray, (5,5), 0)

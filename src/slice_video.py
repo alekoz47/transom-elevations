@@ -1,7 +1,7 @@
 
 import cv2
 
-vidcap = cv2.VideoCapture("../videos/TR5-R1.94A1V.mp4")
+vidcap = cv2.VideoCapture("../videos/T1-R1.94A1V_2.mp4")
 success,image = vidcap.read()
 
 fps = vidcap.get(cv2.CAP_PROP_FPS)

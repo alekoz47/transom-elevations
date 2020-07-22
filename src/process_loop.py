@@ -35,10 +35,10 @@ def find_mask(image_name):
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
     # crop image to only include stern + wave
-    crop = mask[150:800, 500:1350]
+    crop = mask[150:800, 500:1450]
     
     gray = crop
-    final = proj[150:800, 500:1350]
+    final = proj[150:800, 500:1450]
     blur = cv2.GaussianBlur(gray, (5,5), 0)
     thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
     
@@ -55,7 +55,6 @@ def find_mask(image_name):
             if area > max_area:
                 max_area = area
                 best_cnt = i
-                image = cv2.drawContours(img, contours, c, (0, 255, 0), 3)
         c += 1
     
     mask = np.zeros((gray.shape), np.uint8)
@@ -74,7 +73,7 @@ def find_mask(image_name):
     mask = cv2.inRange(hsv, lower_range, upper_range)
     
     # crop image to only include stern + wave
-    crop = mask[150:800, 500:1350]
+    crop = mask[150:800, 500:1450]
     
     gray = crop
     blur = cv2.GaussianBlur(gray, (5,5), 0)
@@ -92,7 +91,6 @@ def find_mask(image_name):
             if area > max_area:
                 max_area = area
                 best_cnt = i
-                image = cv2.drawContours(img, contours, c, (0, 255, 0), 3)
         c += 1
     
     mask = np.zeros((gray.shape), np.uint8)
@@ -153,7 +151,7 @@ def find_mask(image_name):
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
     
-    with open("../data/test3.csv",'a') as data:
+    with open("../data/test5.csv",'a') as data:
         write = csv.writer(data)
         write.writerows([wave_heights])
         
