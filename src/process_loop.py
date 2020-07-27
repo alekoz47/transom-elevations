@@ -3,14 +3,13 @@ import cv2
 import numpy as np
 import csv
 
-def correct_perspective(image):
-    
+def corrected_perspective(image):
+    """Return image with corrected perspective"""
     img = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    #np.savetxt("test1.csv", img.split()[0], delimiter=',')
-    
+
     # project image to vertical plane
     #   this is based on first frame of TR5-R1.94A1V
-    #   based on camera position, this shouldn't change between runs
+    #   camera position shouldn't change between runs
     initial_rect = np.float32([[732, 480],
                                [1151, 483],
                                [1144, 576],
@@ -21,27 +20,21 @@ def correct_perspective(image):
                              [732, 576]])
     matrix = cv2.getPerspectiveTransform(initial_rect, final_rect)
     proj = cv2.warpPerspective(img, matrix, (1920, 1080))
-    
-    return proj
+    crop = proj[150:800, 500:1450]
+    return crop
 
-def mask_image(image_name, lower_range, upper_range):
-
-    ######## Recognize Stern ########
-    
-    # hide everything but stern (based on yellow)
-    hsv = cv2.cvtColor(proj, cv2.COLOR_RGB2HSV)
-    lower_range = np.array([26,150,130])
-    upper_range = np.array([30,255,215])
+def masked_image(proj_image, lower_range, upper_range):
+    """Return image with specified color mask"""
+    # hide everything but selected color
+    hsv = cv2.cvtColor(proj_image, cv2.COLOR_RGB2HSV)
     mask = cv2.inRange(hsv, lower_range, upper_range)
-    
-    # crop image to only include stern + wave
-    crop = mask[150:800, 500:1450]
-    
-    gray = crop
-    final = proj[150:800, 500:1450]
+    return mask
+
+def largest_contour(cropped_image):
+    """Return contour with largest area from image"""
+    gray = cropped_image
     blur = cv2.GaussianBlur(gray, (5,5), 0)
     thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
-    
     contours, hierarchy = cv2.findContours(thresh,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
@@ -56,59 +49,10 @@ def mask_image(image_name, lower_range, upper_range):
                 max_area = area
                 best_cnt = i
         c += 1
-    
-    mask = np.zeros((gray.shape), np.uint8)
-    cv2.drawContours(mask, [best_cnt], 0, 255, -1)
-    cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-    transom_contour = best_cnt # save for later
-    
-    ######## Recognize Waterline #########
-    # this section has a lot of reused code
-    
-    # hide everything but waterline (based on green)
-    lower_range = np.array([29,204,105])
-    upper_range = np.array([40,255,224])
-    mask = cv2.inRange(hsv, lower_range, upper_range)
-    
-    # crop image to only include stern + wave
-    crop = mask[150:800, 500:1450]
-    
-    gray = crop
-    blur = cv2.GaussianBlur(gray, (5,5), 0)
-    thresh = cv2.adaptiveThreshold(blur, 255, 1, 1, 11, 2)
-    
-    contours, hierarchy = cv2.findContours(thresh,
-                                           cv2.RETR_TREE,
-                                           cv2.CHAIN_APPROX_SIMPLE)
-    best_cnt = contours[0]
-    max_area = 0
-    c = 0
-    for i in contours:
-        area = cv2.contourArea(i)
-        if area > 1000:
-            if area > max_area:
-                max_area = area
-                best_cnt = i
-        c += 1
-    
-    mask = np.zeros((gray.shape), np.uint8)
-    cv2.drawContours(mask, [best_cnt], 0, 255, -1)
-    cv2.drawContours(mask, [best_cnt], 0, 0, 2)
-    waterline_contour = best_cnt
-    
-    final = cv2.cvtColor(final, cv2.COLOR_BGR2RGB)
-    cv2.drawContours(final, [transom_contour], 0, 0, 2)
-    cv2.drawContours(final, [waterline_contour], 0, 0, 2)
-        
-    return transom_contour, waterline_contour
+    return best_cnt
 
-def get_largest_contour(masked_image):
-    
-    return contour
-
-def get_elevations(transom_contour, waterline_contour):
-    ######## Locate Coordinates ########
-    
+def elevations(transom_contour, waterline_contour):
+    """Return elevations from contours"""
     # we have waterline_contour and transom_contour
     #   find top left and right corners of transom
     #   split vessel into buttocks
@@ -142,32 +86,50 @@ def get_elevations(transom_contour, waterline_contour):
                                      key=lambda r: abs(x - r[0][0]))[:5]
         raw_wave_heights.append(min(wave_contour_bounds,
                                     key=lambda r: r[0][1])[0][1])
-    #wave_points = np.int32([np.int32([buttocks[i], raw_wave_heights[i]]) for i in range(7)])
     
     # find scaled wave heights
     # may replace this code if I get sizing of grid
     scale = 0.23 / (transom_tr[0] - transom_tl[0]) # beam is 0.23 m
     transom_height = (transom_tr[1] + transom_tl[1]) / 2
     transom_to_waterline = 0.09 / scale # top to design waterline is 0.09 m
-    
     unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
-    
     return wave_heights
 
-for frame in range(1500):
+def test_mask(frame):
     image_name = "../images/frame%d.jpg" % frame
     print(image_name)
     img = cv2.imread(image_name)
     
-    prj = correct_perspective(img)
-    tsm = mask_image(prj, np.array([26,150,130]), np.array([30,255,215]))
-    wtl = mask_image(tsm, np.array([29,204,105]), np.array([40,255,224]))
-    transom = get_largest_contour(tsm)
-    waterline = get_largest_contour(wtl)
-    heights = get_elevations(transom, waterline)
+    prj = corrected_perspective(img)
+    tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
+    transom = largest_contour(tsm)
+    wtl = masked_image(prj, np.array([29,204,105]), np.array([40,255,224]))
+    waterline = largest_contour(wtl)
     
-    with open("../data/test5.csv",'a') as data:
+    cv2.drawContours(prj, [transom], 0, 0, 2)
+    cv2.drawContours(prj, [waterline], 0, 0, 2)
+    cv2.cvtColor(prj, cv2.COLOR_BGR2RGB)
+    cv2.imwrite("../images/testing/frame%dtest.jpg" % frame, prj)
+
+def write_elevations(heights, data_path):
+    with open(data_path,'a') as data:
         write = csv.writer(data)
         write.writerows([heights])
+
+def get_elevations(data_path):
+    for frame in range(1500):
+        image_name = "../images/frame%d.jpg" % frame
+        print(image_name)
+        img = cv2.imread(image_name)
+        
+        prj = corrected_perspective(img)
+        tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
+        transom = largest_contour(tsm)
+        wtl = masked_image(prj, np.array([29,204,105]), np.array([40,255,224]))
+        waterline = largest_contour(wtl)
+        heights = elevations(transom, waterline)
+        
+        write_elevations(heights, data_path)
+        
