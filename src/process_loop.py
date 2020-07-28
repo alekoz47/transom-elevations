@@ -93,7 +93,6 @@ def elevations(transom_contour, waterline_contour):
 
 def test_mask(frame):
     image_name = "../images/frame%d.jpg" % frame
-    print(image_name)
     img = cv2.imread(image_name)
     
     prj = corrected_perspective(img)
@@ -115,7 +114,6 @@ def write_elevations(heights, data_path):
 def get_elevations(data_path):
     for frame in range(1500):
         image_name = "../images/frame%d.jpg" % frame
-        print(image_name)
         img = cv2.imread(image_name)
         
         prj = corrected_perspective(img)
@@ -126,4 +124,5 @@ def get_elevations(data_path):
         heights = elevations(transom, waterline)
         
         write_elevations(heights, data_path)
+    print("Video processing complete.")
         

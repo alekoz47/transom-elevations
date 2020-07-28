@@ -15,12 +15,12 @@ def slice_video(video_path):
     count = 0
     success = True
     while success:
-        print(count)
         vidcap.set(cv2.CAP_PROP_POS_MSEC, (count * rate * 1000))
         cv2.imwrite("../images/frame%d.jpg" % count, image)
         success,image = vidcap.read()
         count += 1
     vidcap.release()
+    print("Frame slicing complete.")
 
 # scan all T5 runs
 for filename in os.listdir("../videos/2016-06-29_T5"):
@@ -30,6 +30,7 @@ for filename in os.listdir("../videos/2016-06-29_T5"):
         slice_video(video_path)
         data_path = video_path.replace("videos", "data")
         get_elevations(data_path)
+        print("Video %d analysis complete." % filename)
         
 # scan all T1 runs
 for filename in os.listdir("../videos/2016-06-27_T1"):
@@ -39,3 +40,4 @@ for filename in os.listdir("../videos/2016-06-27_T1"):
         slice_video(video_path)
         data_path = video_path.replace("videos", "data")
         get_elevations(data_path)
+        print("Video %d analysis complete." % filename)
