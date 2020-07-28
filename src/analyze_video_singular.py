@@ -25,5 +25,5 @@ def slice_video(video_path):
 
 video_path = "../videos/2016-06-29_T5/TR5-R1.94A1V.mp4"
 slice_video(video_path)
-data_path = video_path.replace("videos", "data")
+data_path = video_path.replace("videos", "data").replace("mp4", "csv")
 get_elevations(data_path)

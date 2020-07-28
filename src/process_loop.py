@@ -38,17 +38,11 @@ def largest_contour(cropped_image):
     contours, hierarchy = cv2.findContours(thresh,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
-    # TODO: replace this with sort function lambda: cv2.contourArea()
-    best_cnt = contours[0]
-    max_area = 0
-    c = 0
-    for i in contours:
-        area = cv2.contourArea(i)
-        if area > 1000:
-            if area > max_area:
-                max_area = area
-                best_cnt = i
-        c += 1
+    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
+                          contours)
+    best_cnt = sorted(big_contours,
+                      key=lambda c: cv2.contourArea(c),
+                      reverse=True)[0]
     return best_cnt
 
 def elevations(transom_contour, waterline_contour):

@@ -22,10 +22,19 @@ def slice_video(video_path):
         count += 1
     vidcap.release()
 
-
+# scan all T5 runs
 for filename in os.listdir("../videos/2016-06-29_T5"):
     if filename != "Thumbs.db":
         video_path = "../videos/2016-06-29_T5/" + filename
+        print(video_path)
+        slice_video(video_path)
+        data_path = video_path.replace("videos", "data")
+        get_elevations(data_path)
+        
+# scan all T1 runs
+for filename in os.listdir("../videos/2016-06-27_T1"):
+    if filename != "Thumbs.db":
+        video_path = "../videos/2016-06-27_T1/" + filename
         print(video_path)
         slice_video(video_path)
         data_path = video_path.replace("videos", "data")
