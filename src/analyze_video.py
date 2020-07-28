@@ -28,9 +28,9 @@ for filename in os.listdir("../videos/2016-06-29_T5"):
         video_path = "../videos/2016-06-29_T5/" + filename
         print(video_path)
         slice_video(video_path)
-        data_path = video_path.replace("videos", "data")
+        data_path = video_path.replace("videos", "data").replace("mp4", "csv")
         get_elevations(data_path)
-        print("Video %d analysis complete." % filename)
+        print("Video %s analysis complete." % filename)
         
 # scan all T1 runs
 for filename in os.listdir("../videos/2016-06-27_T1"):
@@ -38,6 +38,6 @@ for filename in os.listdir("../videos/2016-06-27_T1"):
         video_path = "../videos/2016-06-27_T1/" + filename
         print(video_path)
         slice_video(video_path)
-        data_path = video_path.replace("videos", "data")
+        data_path = video_path.replace("videos", "data").replace("mp4", "csv")
         get_elevations(data_path)
-        print("Video %d analysis complete." % filename)
+        print("Video %s analysis complete." % filename)
