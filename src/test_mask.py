@@ -1,4 +1,5 @@
 
 from process_loop import test_mask
 
-test_mask(50)
+for i in range(30):
+    test_mask(610 + i)

@@ -105,7 +105,7 @@ def test_mask(frame):
     prj = corrected_perspective(img)
     tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
     transom = largest_contour(tsm)
-    wtl = masked_image(prj, np.array([29,204,105]), np.array([40,255,224]))
+    wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
     waterline = largest_contour(wtl)
     
     cv2.drawContours(prj, [transom], 0, 0, 2)
@@ -127,7 +127,7 @@ def get_elevations(data_path):
         prj = corrected_perspective(img)
         tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
         transom = largest_contour(tsm)
-        wtl = masked_image(prj, np.array([29,204,105]), np.array([40,255,224]))
+        wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
         waterline = largest_contour(wtl)
         heights = elevations(transom, waterline)
         
