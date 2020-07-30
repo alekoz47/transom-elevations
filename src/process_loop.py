@@ -38,9 +38,9 @@ def largest_contour(cropped_image):
     contours, hierarchy = cv2.findContours(thresh,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
-    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
-                          contours)
-    best_cnt = sorted(big_contours,
+#    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
+ #                         contours)
+    best_cnt = sorted(contours,
                       key=lambda c: cv2.contourArea(c),
                       reverse=True)[0]
     return best_cnt
