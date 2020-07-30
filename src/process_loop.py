@@ -38,9 +38,9 @@ def largest_contour(cropped_image):
     contours, hierarchy = cv2.findContours(thresh,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
-    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
-                          contours)
-    best_cnt = sorted(big_contours,
+#    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
+#                          contours)
+    best_cnt = sorted(contours,
                       key=lambda c: cv2.contourArea(c),
                       reverse=True)[0]
     return best_cnt
@@ -120,16 +120,17 @@ def test_mask(frame):
     image_name = "../images/frame%d.jpg" % frame
     img = cv2.imread(image_name)
     
-    prj = corrected_perspective(img)
-    tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
-    transom = largest_contour(tsm)
-    wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
-    waterline = largest_contour(wtl)
-    
-    cv2.drawContours(prj, [transom], 0, 0, 2)
-    cv2.drawContours(prj, [waterline], 0, 0, 2)
-    cv2.cvtColor(prj, cv2.COLOR_BGR2RGB)
+    prj = apply_morphology(corrected_perspective(img))
     cv2.imwrite("../images/testing/frame%dtest.jpg" % frame, prj)
+    #tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
+    #transom = largest_contour(tsm)
+    #wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
+    #waterline = largest_contour(wtl)
+    
+    #cv2.drawContours(prj, [transom], 0, 0, 2)
+    #cv2.drawContours(prj, [waterline], 0, 0, 2)
+    #cv2.cvtColor(prj, cv2.COLOR_BGR2RGB)
+    #cv2.imwrite("../images/testing/frame%dtest.jpg" % frame, prj)
 
 def write_elevations(heights, data_path):
     with open(data_path,'a') as data:
@@ -141,9 +142,9 @@ def get_elevations(data_path):
         image_name = "../images/frame%d.jpg" % frame
         img = cv2.imread(image_name)
         
-        prj = corrected_perspective(img)
+        prj = apply_morphology(corrected_perspective(img))
         tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
-        transom = largest_contour(apply_morphology(tsm))
+        transom = largest_contour(tsm)
         wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
         waterline = largest_contour(wtl)
         heights = elevations(transom, waterline)
