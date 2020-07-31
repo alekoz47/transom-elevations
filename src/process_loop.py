@@ -77,7 +77,7 @@ def elevations(transom_contour, waterline_contour):
     wave_contour_bounds = []
     for x in buttocks:
         wave_contour_bounds = sorted(waterline_contour,
-                                     key=lambda r: abs(x - r[0][0]))[:5]
+                                     key=lambda r: abs(x - r[0][0]))[:35]
         raw_wave_heights.append(min(wave_contour_bounds,
                                     key=lambda r: r[0][1])[0][1])
     
@@ -122,7 +122,7 @@ def get_elevations(data_path):
         wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
         waterline = largest_contour(wtl)
         heights = elevations(transom, waterline)
-        
+            
         write_elevations(heights, data_path)
     print("Video processing complete.")
         
