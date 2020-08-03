@@ -45,7 +45,7 @@ def largest_contour(cropped_image):
                       reverse=True)[0]
     return best_cnt
 
-def elevations(transom_contour, waterline_contour):
+def elevations(transom_contour, waterline_contour, is_t1):
     """Return elevations from contours"""
     # we have waterline_contour and transom_contour
     #   find top left and right corners of transom
@@ -89,6 +89,13 @@ def elevations(transom_contour, waterline_contour):
     unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
+    
+    # make corrections for T1 or T5 hull
+    if is_t1 > 0:
+        wave_heights = [(h / 2) - 0.01 for h in wave_heights]
+    else:
+        wave_heights = [h + 0.015 for h in wave_heights]
+        
     return wave_heights
 
 def test_mask(frame):
@@ -121,7 +128,7 @@ def get_elevations(data_path):
         transom = largest_contour(tsm)
         wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
         waterline = largest_contour(wtl)
-        heights = elevations(transom, waterline)
+        heights = elevations(transom, waterline, data_path.find("T1"))
             
         write_elevations(heights, data_path)
     print("Video processing complete.")
