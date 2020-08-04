@@ -38,14 +38,12 @@ def largest_contour(cropped_image):
     contours, hierarchy = cv2.findContours(thresh,
                                            cv2.RETR_TREE,
                                            cv2.CHAIN_APPROX_SIMPLE)
-    big_contours = filter(lambda c: cv2.contourArea(c) > 1000,
-                          contours)
-    best_cnt = sorted(big_contours,
+    best_cnt = sorted(contours,
                       key=lambda c: cv2.contourArea(c),
                       reverse=True)[0]
     return best_cnt
 
-def elevations(transom_contour, waterline_contour):
+def elevations(transom_contour, waterline_contour, is_t1):
     """Return elevations from contours"""
     # we have waterline_contour and transom_contour
     #   find top left and right corners of transom
@@ -77,7 +75,7 @@ def elevations(transom_contour, waterline_contour):
     wave_contour_bounds = []
     for x in buttocks:
         wave_contour_bounds = sorted(waterline_contour,
-                                     key=lambda r: abs(x - r[0][0]))[:5]
+                                     key=lambda r: abs(x - r[0][0]))[:35]
         raw_wave_heights.append(min(wave_contour_bounds,
                                     key=lambda r: r[0][1])[0][1])
     
@@ -89,6 +87,13 @@ def elevations(transom_contour, waterline_contour):
     unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
+    
+    # make corrections for T1 or T5 hull
+    if is_t1 > 0:
+        wave_heights = [(h / 2) - 0.01 for h in wave_heights]
+    else:
+        wave_heights = [h + 0.015 for h in wave_heights]
+        
     return wave_heights
 
 def test_mask(frame):
@@ -107,7 +112,7 @@ def test_mask(frame):
     cv2.imwrite("../images/testing/frame%dtest.jpg" % frame, prj)
 
 def write_elevations(heights, data_path):
-    with open(data_path,'a') as data:
+    with open(data_path,'a', newline='') as data:
         write = csv.writer(data)
         write.writerows([heights])
 
@@ -121,8 +126,8 @@ def get_elevations(data_path):
         transom = largest_contour(tsm)
         wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
         waterline = largest_contour(wtl)
-        heights = elevations(transom, waterline)
-        
+        heights = elevations(transom, waterline, data_path.find("T1"))
+            
         write_elevations(heights, data_path)
     print("Video processing complete.")
         
