@@ -112,7 +112,7 @@ def test_mask(frame):
     cv2.imwrite("../images/testing/frame%dtest.jpg" % frame, prj)
 
 def write_elevations(heights, data_path):
-    with open(data_path,'a') as data:
+    with open(data_path,'a', newline='') as data:
         write = csv.writer(data)
         write.writerows([heights])
 
