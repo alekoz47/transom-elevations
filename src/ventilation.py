@@ -2,6 +2,7 @@
 import os
 import csv
 import re
+import math
 
 def get_ventilation(data_path):
     """Find average ventilation factor for given run"""
@@ -33,8 +34,9 @@ def get_ventilation(data_path):
 for filename in os.listdir("../data/2016-06-29_T5"):
     if filename != "Thumbs.db":
         data_path = "../data/2016-06-29_T5/" + filename
-        fn_match = re.search('-R(.*)A1V', filename)
-        fn = float(fn_match.group(1))
+        speed_match = re.search('-R(.*)A1V', filename)
+        speed = float(speed_match.group(1)) / 3.28084 # convert ft/s to m/s
+        fn = speed / math.sqrt(9.81 * 0.052)
         ventilations = get_ventilation(data_path)
         print(data_path)
         with open("../data/ventilation/2016-06-29_T5.csv", 'a', newline='') as data:
@@ -47,8 +49,9 @@ for filename in os.listdir("../data/2016-06-29_T5"):
 for filename in os.listdir("../data/2016-06-27_T1"):
     if filename != "Thumbs.db":
         data_path = "../data/2016-06-27_T1/" + filename
-        fn_match = re.search('-R(.*)A1V', filename)
-        fn = float(fn_match.group(1))
+        speed_match = re.search('-R(.*)A1V', filename)
+        speed = float(speed_match.group(1)) / 3.28084 # convert ft/s to m/s
+        fn = speed / math.sqrt(9.81 * 0.029)
         ventilations = get_ventilation(data_path)
         print(data_path)
         with open("../data/ventilation/2016-06-27_T1.csv", 'a', newline='') as data:
