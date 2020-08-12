@@ -25,27 +25,31 @@ def get_ventilation(data_path):
     else:
         elevations = map(get_elevation_averages_unsteady, steady_data)
         
-    drafts = [static_draft + elevation for elevation in elevations]
-    drafts = map(lambda el: el + static_draft, elevations)
-    ventilations = [vf(static_draft, draft) for draft in drafts]
+    ventilations = [draft_from_elevation(el, static_draft) for el in elevations]
     return ventilations
 
 def get_elevation_averages_steady(steady_data):
     """Find average ventilation factor for steady runs"""
-    
-    quantiles = np.quantile(steady_data, 3)
-    average_ventilations = np.median(quantiles[1])
+    steady_data = list(steady_data)
+    average_ventilations = np.quantile(steady_data, 0.5)
     
     return [average_ventilations, 0]
     
 def get_elevation_averages_unsteady(steady_data):
     """Find min and max ventilation factors for unsteady runs"""
-    
-    quantiles = np.quantile(steady_data, 4)
-    min_ventilations = np.median(quantiles[0])
-    max_ventilations = np.median(quantiles[3])
+    steady_data = list(steady_data)
+    min_ventilations = np.quantile(steady_data, 0.33)
+    max_ventilations = np.quantile(steady_data, 0.67)
     
     return [min_ventilations, max_ventilations]
+
+def vf_from_elevation(elevation, static_draft):
+    draft = static_draft + elevation
+    ventilation = vf(static_draft, draft)
+    return ventilation
+
+def draft_from_elevation(elevation, static_draft):
+    return elevation + static_draft
 
 def vf(static_draft, draft):
     return (static_draft - draft) / static_draft
