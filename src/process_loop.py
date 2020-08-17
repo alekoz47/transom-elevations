@@ -63,22 +63,26 @@ def elevations(transom_contour, waterline_contour, is_t1):
                      key=lambda r: r[0][0])[0][0][0]
     waterline_r = sorted(waterline_contour,
                      key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
-    
+    for point in waterline_contour:
+        with open("../test.csv", 'a', newline='') as data:
+            write = csv.writer(data)
+            write.writerows([point])
     # split vessel into buttocks
     waterline_span = waterline_r - waterline_l
     buttocks = []
     for b in range(7):
         buttocks.append(waterline_l + (b / 6) * waterline_span)
-    
+
     # find raw wave heights
     raw_wave_heights = []
-    wave_contour_bounds = []
     for x in buttocks:
-        wave_contour_bounds = sorted(waterline_contour,
-                                     key=lambda r: abs(x - r[0][0]))[:35]
-        raw_wave_heights.append(min(wave_contour_bounds,
-                                    key=lambda r: r[0][1])[0][1])
-    
+        heights_search = sorted(waterline_contour, key=lambda r: abs(x - r[0][0]))[:40]
+        sorted_heights = sorted(heights_search, key=lambda r: r[0][1] ** 2 + (r[0][0]-x) ** 2)
+        heights_x = [sorted_heights[0][0][0], sorted_heights[1][0][0]]
+        heights_y = [sorted_heights[0][0][1], sorted_heights[1][0][1]]
+        height = np.interp(x, heights_x, heights_y)
+        raw_wave_heights.append(height)
+        
     # find scaled wave heights
     # may replace this code if I get sizing of grid
     scale = 0.23 / (transom_tr[0] - transom_tl[0]) # beam is 0.23 m
@@ -100,10 +104,15 @@ def test_mask(frame):
     image_name = "../images/frame%d.jpg" % frame
     img = cv2.imread(image_name)
     
+    tsm_low = np.array([26,150,130])
+    tsm_high = np.array([30,255,215])
+    wtl_low = np.array([30,204,105])
+    wtl_high = np.array([40,255,180])
+    
     prj = corrected_perspective(img)
-    tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
+    tsm = masked_image(prj, tsm_low, tsm_high)
     transom = largest_contour(tsm)
-    wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
+    wtl = masked_image(prj, wtl_low, wtl_high)
     waterline = largest_contour(wtl)
     
     cv2.drawContours(prj, [transom], 0, 0, 2)
@@ -121,10 +130,41 @@ def get_elevations(data_path):
         image_name = "../images/frame%d.jpg" % frame
         img = cv2.imread(image_name)
         
+        if data_path.find("T1") > 1:
+            tsm_low = np.array([26,150,130])
+            tsm_high = np.array([30,255,215])
+            wtl_low = np.array([30,204,105])
+            wtl_high = np.array([40,255,224])
+        elif data_path.find("T2") > 1:
+            tsm_low = np.array([26,150,130])
+            tsm_high = np.array([30,255,215])
+            wtl_low = np.array([30,204,105])
+            wtl_high = np.array([40,255,224])
+        elif data_path.find("T3") > 1:
+            tsm_low = np.array([26,150,130])
+            tsm_high = np.array([30,255,215])
+            wtl_low = np.array([30,204,105])
+            wtl_high = np.array([40,255,224])
+        elif data_path.find("T4") > 1:
+            tsm_low = np.array([18,150,130])
+            tsm_high = np.array([24,255,215])
+            wtl_low = np.array([22,102,105])
+            wtl_high = np.array([40,255,200])
+        elif data_path.find("T5") > 1:
+            tsm_low = np.array([26,150,130])
+            tsm_high = np.array([30,255,215])
+            wtl_low = np.array([30,204,105])
+            wtl_high = np.array([40,255,180])
+        else:
+            tsm_low = np.array([26,150,130])
+            tsm_high = np.array([30,255,215])
+            wtl_low = np.array([30,204,105])
+            wtl_high = np.array([40,255,224])
+        
         prj = corrected_perspective(img)
-        tsm = masked_image(prj, np.array([26,150,130]), np.array([30,255,215]))
+        tsm = masked_image(prj, tsm_low, tsm_high)
         transom = largest_contour(tsm)
-        wtl = masked_image(prj, np.array([30,204,105]), np.array([40,255,224]))
+        wtl = masked_image(prj, wtl_low, wtl_high)
         waterline = largest_contour(wtl)
         heights = elevations(transom, waterline, data_path.find("T1"))
             
