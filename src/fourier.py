@@ -23,7 +23,7 @@ x = np.array(elevations)
 y = fft(x)
 y = list(map(abs, y))
 
-incident_max = max(y[0:]) # remove starting signal at 0hz
+incident_max = max(y[0:60]) # remove starting signal at 0hz
 incident_max_index = y.index(incident_max)
 y = np.array(y)
 
