@@ -63,10 +63,7 @@ def elevations(transom_contour, waterline_contour, is_t1):
                      key=lambda r: r[0][0])[0][0][0]
     waterline_r = sorted(waterline_contour,
                      key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
-    for point in waterline_contour:
-        with open("../test.csv", 'a', newline='') as data:
-            write = csv.writer(data)
-            write.writerows([point])
+    
     # split vessel into buttocks
     waterline_span = waterline_r - waterline_l
     buttocks = []
