@@ -16,7 +16,7 @@ def get_ventilation(data_path):
     
     with open(data_path, 'r') as data:
         data_reader = csv.reader(data, delimiter=',')
-        steady_data = list(data_reader)[400:1100]
+        steady_data = list(data_reader)[700:1000]
     steady_data = [map(float, row) for row in steady_data]
     
     # test for steady run
