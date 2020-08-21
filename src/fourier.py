@@ -18,12 +18,12 @@ def get_elevations(data_path, buttock):
 
 
 
-elevations = get_elevations("../data/2016-06-29_T5/TR5-R1.94A1V.csv", 3)
+elevations = get_elevations("../data/2016-06-27_T1/T1-R1.94A1V_1.csv", 3)
 x = np.array(elevations)
 y = fft(x)
 y = list(map(abs, y))
 
-incident_max = max(y[0:60]) # remove starting signal at 0hz
+incident_max = max(y[1:60]) # remove starting signal at 0hz
 incident_max_index = y.index(incident_max)
 y = np.array(y)
 
