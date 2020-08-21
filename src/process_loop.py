@@ -52,17 +52,28 @@ def elevations(transom_contour, waterline_contour, is_t1):
     #   scale and find coordinates of waterline relative to transom
     # TODO: check corner points with transom and wave
     
-    # find top corners of transom
-    transom_tl = sorted(transom_contour,
-                     key=lambda r: r[0][0])[0][0]
-    transom_tr = sorted(transom_contour,
-                     key=lambda r: r[0][0])[len(transom_contour) -1][0]
+    # find boundaries of transom
+    transom_l = max(transom_contour,
+                    key=lambda r: r[0][0])[0][0]
+    transom_r = min(transom_contour,
+                    key=lambda r: r[0][0])[0][0]
+    transom_b = max(transom_contour,
+                    key=lambda r: r[0][1])[0][1]
+    transom_t = min(transom_contour,
+                    key=lambda r: r[0][1])[0][1]
     
-    #find edges of waterline
-    waterline_l = sorted(waterline_contour,
-                     key=lambda r: r[0][0])[0][0][0]
-    waterline_r = sorted(waterline_contour,
-                     key=lambda r: r[0][0])[len(waterline_contour) -1][0][0]
+    # find top corners of transom
+    transom_tl = min(transom_contour,
+                     key=lambda r: (r[0][0] - transom_l) ** 2 + (r[0][1] - transom_t) ** 2)[0]
+    transom_tr = min(transom_contour,
+                     key=lambda r: (r[0][0] - transom_r) ** 2 + (r[0][1] - transom_t) ** 2)[0]
+    
+    
+    # find edges of waterline
+    waterline_l = min(waterline_contour,
+                     key=lambda r: (r[0][0] - transom_l) ** 2 + (r[0][1] - transom_b) ** 2)[0][0]
+    waterline_r = min(waterline_contour,
+                     key=lambda r: (r[0][0] - transom_r) ** 2 + (r[0][1] - transom_b) ** 2)[0][0]
     
     # split vessel into buttocks
     waterline_span = waterline_r - waterline_l
@@ -84,14 +95,17 @@ def elevations(transom_contour, waterline_contour, is_t1):
     # may replace this code if I get sizing of grid
     scale = 0.23 / (transom_tr[0] - transom_tl[0]) # beam is 0.23 m
     transom_height = (transom_tr[1] + transom_tl[1]) / 2
-    transom_to_waterline = 0.09 / scale # top to design waterline is 0.09 m
+    if is_t1 > 0:
+        transom_to_waterline = 0.10 / scale # T1
+    else:
+        transom_to_waterline = 0.09 / scale # T5
     unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
     
     # make corrections for T1 or T5 hull
     if is_t1 > 0:
-        wave_heights = [(h / 2) - 0.01 for h in wave_heights]
+        wave_heights = [0.205 - h for h in wave_heights]
     else:
         wave_heights = [h + 0.015 for h in wave_heights]
         
@@ -130,7 +144,7 @@ def get_elevations(data_path):
         if data_path.find("T1") > 1:
             tsm_low = np.array([21,147,130])
             tsm_high = np.array([35,255,200])
-            wtl_low = np.array([29,204,105])
+            wtl_low = np.array([29,116,105])
             wtl_high = np.array([43,255,224])
         elif data_path.find("T2") > 1:
             tsm_low = np.array([26,150,130])
