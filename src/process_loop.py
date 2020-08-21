@@ -128,10 +128,10 @@ def get_elevations(data_path):
         img = cv2.imread(image_name)
         
         if data_path.find("T1") > 1:
-            tsm_low = np.array([26,150,130])
-            tsm_high = np.array([30,255,215])
-            wtl_low = np.array([30,204,105])
-            wtl_high = np.array([40,255,224])
+            tsm_low = np.array([21,147,130])
+            tsm_high = np.array([35,255,200])
+            wtl_low = np.array([29,204,105])
+            wtl_high = np.array([43,255,224])
         elif data_path.find("T2") > 1:
             tsm_low = np.array([26,150,130])
             tsm_high = np.array([30,255,215])
