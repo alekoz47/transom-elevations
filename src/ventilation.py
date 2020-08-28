@@ -11,48 +11,36 @@ def get_ventilation(data_path):
     # test for T1 hull
     if data_path.find("T1") > 0:
         static_draft = 0.029
-    else:
+    elif data_path.find("T4") > 0:
+        static_draft = 0.052
+    else: # assume this is T5
         static_draft = 0.052
     
     with open(data_path, 'r') as data:
         data_reader = csv.reader(data, delimiter=',')
-        steady_data = list(data_reader)[700:1000]
+        steady_data = list(data_reader)[700:1100]
     steady_data = [map(float, row) for row in steady_data]
     
-    # test for steady run
-    if data_path.find("A1VS") > 0:
-        elevations = map(get_elevation_averages_steady, steady_data)
-    else:
-        elevations = map(get_elevation_averages_unsteady, steady_data)
+    sum_elevations = [0 for i in range(7)]
+    for row in steady_data:
+        sum_elevations = map(sum, zip(sum_elevations, row))
+    elevations = [elevation / len(steady_data) for elevation in sum_elevations]
+    
+    drafts = [static_draft + elevation for elevation in elevations]
+    ventilations = [(static_draft - draft) / static_draft for draft in drafts]
+    
+    # TODO: read FFT amplitudes from ../data/fft/______.csv
+    #   output [elevation - amptitude / 2, elevation + amplitude / 2] for unsteady
+    #   output [elevation, elevation] for steady???
+    # 
+    
+    # # test for steady run
+    # if data_path.find("A1VS") > 0:
+    #     elevations = map(get_elevation_averages_steady, steady_data)
+    # else:
+    #     elevations = map(get_elevation_averages_unsteady, steady_data)
         
-    ventilations = [draft_from_elevation(el, static_draft) for el in elevations]
     return ventilations
-
-def get_elevation_averages_steady(steady_data):
-    """Find average ventilation factor for steady runs"""
-    steady_data = list(steady_data)
-    average_ventilations = np.quantile(steady_data, 0.5)
-    
-    return [average_ventilations, 0]
-    
-def get_elevation_averages_unsteady(steady_data):
-    """Find min and max ventilation factors for unsteady runs"""
-    steady_data = list(steady_data)
-    min_ventilations = np.quantile(steady_data, 0.33)
-    max_ventilations = np.quantile(steady_data, 0.67)
-    
-    return [min_ventilations, max_ventilations]
-
-def vf_from_elevation(elevation, static_draft):
-    draft = static_draft + elevation
-    ventilation = vf(static_draft, draft)
-    return ventilation
-
-def draft_from_elevation(elevation, static_draft):
-    return elevation + static_draft
-
-def vf(static_draft, draft):
-    return (static_draft - draft) / static_draft
 
 
 
