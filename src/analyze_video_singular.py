@@ -1,8 +1,10 @@
 
 import cv2
-from process_loop import get_elevations
+from elevations_utils import get_elevations
 
 def slice_video(video_path):
+    """ Slices any video into 1500 frames """
+    # TODO: error handling in case 1500 frames not possible
     vidcap = cv2.VideoCapture(video_path)
     success,image = vidcap.read()
     
@@ -23,7 +25,8 @@ def slice_video(video_path):
 
 
 
-video_path = "../videos/2016-06-29_T5/TR5-R3.00A1VS.mp4"
-slice_video(video_path)
-#data_path = video_path.replace("videos", "data/testing").replace("mp4", "csv")
-#get_elevations(data_path)
+if __name__ == "__main__":
+    video_path = "../videos/2016-06-29_T5/TR5-R3.00A1V.mp4"
+    slice_video(video_path)
+    data_path = video_path.replace("videos", "data/testing").replace("mp4", "csv")
+    get_elevations(data_path)
