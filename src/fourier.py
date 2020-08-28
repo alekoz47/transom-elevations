@@ -7,7 +7,7 @@ import re
 import math
 import matplotlib.pyplot as plt
 
-def get_elevations(data_path, buttock):
+def get_elevations_from_data(data_path, buttock):
     """Find elevations for given run at given buttock"""
     
     with open(data_path, 'r') as data:
@@ -67,7 +67,7 @@ if __name__ == "__main__":
             speed_match = re.search('-R(.*)A1V', filename)
             speed = float(speed_match.group(1)) / 3.28084 # convert ft/s to m/s
             fn = speed / math.sqrt(9.81 * 0.052)
-            elevations = get_elevations(data_path, 3)
+            elevations = get_elevations_from_data(data_path, 3)
             amp, freq = get_incident_data(elevations)
             print(data_path)
             with open("../data/fft/2016-06-29_T5.csv", 'a', newline='') as data:
@@ -84,7 +84,7 @@ if __name__ == "__main__":
             speed_match = re.search('-R(.*)[AD]1', filename)
             speed = float(speed_match.group(1)) / 3.28084 # convert ft/s to m/s
             fn = speed / math.sqrt(9.81 * 0.052)
-            elevations = get_elevations(data_path, 3)
+            elevations = get_elevations_from_data(data_path, 3)
             amp, freq = get_incident_data(elevations)
             print(data_path)
             with open("../data/fft/2016-03-11, T4.csv", 'a', newline='') as data:
@@ -100,7 +100,7 @@ if __name__ == "__main__":
             speed_match = re.search('-R(.*)A1V', filename)
             speed = float(speed_match.group(1)) / 3.28084 # convert ft/s to m/s
             fn = speed / math.sqrt(9.81 * 0.052)
-            elevations = get_elevations(data_path, 3)
+            elevations = get_elevations_from_data(data_path, 3)
             amp, freq = get_incident_data(elevations)
             print(data_path)
             with open("../data/fft/2016-06-27_T1.csv", 'a', newline='') as data:

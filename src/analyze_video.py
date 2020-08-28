@@ -1,7 +1,7 @@
 
 import cv2
 import os
-from process_loop import get_elevations
+from elevations_utils import get_elevations
 
 def slice_video(video_path):
     vidcap = cv2.VideoCapture(video_path)

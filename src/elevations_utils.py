@@ -43,7 +43,7 @@ def largest_contour(cropped_image):
                       reverse=True)[0]
     return best_cnt
 
-def elevations(transom_contour, waterline_contour, is_t1):
+def elevations(transom_contour, waterline_contour, data_path):
     """Return elevations from contours"""
     # we have waterline_contour and transom_contour
     #   find top left and right corners of transom
@@ -95,19 +95,21 @@ def elevations(transom_contour, waterline_contour, is_t1):
     # may replace this code if I get sizing of grid
     scale = 0.23 / (transom_tr[0] - transom_tl[0]) # beam is 0.23 m
     transom_height = (transom_tr[1] + transom_tl[1]) / 2
-    if is_t1 > 0:
-        transom_to_waterline = 0.10 / scale # T1
-    else:
+    if data_path.find("T1") > 0 or data_path.find("T4") > 0:
+        transom_to_waterline = 0.10 / scale # T1 or T4
+    elif data_path.find("T5") > 0:
         transom_to_waterline = 0.09 / scale # T5
     unscaled_wave_heights = [h - (transom_height + transom_to_waterline) 
                              for h in raw_wave_heights]
     wave_heights = [-h * scale for h in unscaled_wave_heights]
     
-    # make corrections for T1 or T5 hull
-    if is_t1 > 0:
-        wave_heights = [0.205 - h for h in wave_heights]
-    else:
-        wave_heights = [h + 0.015 for h in wave_heights]
+    # make corrections for hulls
+    if data_path.find("T1") > 0:
+        wave_heights = [0.1 - (h / 2) for h in wave_heights]
+    elif data_path.find("T4") > 0:
+        wave_heights = [0.175 - h for h in wave_heights]
+    else: # assume T5
+        wave_heights = [0.1 - (h / 2) for h in wave_heights]
         
     return wave_heights
 
@@ -177,7 +179,7 @@ def get_elevations(data_path):
         transom = largest_contour(tsm)
         wtl = masked_image(prj, wtl_low, wtl_high)
         waterline = largest_contour(wtl)
-        heights = elevations(transom, waterline, data_path.find("T1"))
+        heights = elevations(transom, waterline, data_path)
             
         write_elevations(heights, data_path)
     print("Video processing complete.")
