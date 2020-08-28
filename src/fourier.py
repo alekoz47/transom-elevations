@@ -10,12 +10,14 @@ import matplotlib.pyplot as plt
 def get_elevations_from_data(data_path, buttock):
     """Find elevations for given run at given buttock"""
     
+    # read from elevation data files
     with open(data_path, 'r') as data:
         data_reader = csv.reader(data, delimiter=',')
-        steady_data = list(data_reader)[700:1000]
+        steady_data = list(data_reader)[700:1100]
+    
+    # convert raw elevation data to happy format
     steady_data = [map(float, row) for row in steady_data]
     steady_data = [list(row) for row in steady_data]
-    
     elevations = [row[buttock] for row in steady_data]
     return elevations
 
@@ -23,17 +25,22 @@ def get_incident_data(elevations):
     """Find amplitude and frequency given elevations time history
     - Returns frequency in frames rather than Hz for now"""
     # TODO: convert frequency to Hz based on video metadata
+    #   currently outputs in terms of frames
     
+    # perform fast fourier transform on elevations time history
     x = np.array(elevations)
     y = fft(x)
-    y = list(map(abs, y))
+    y = list(map(abs, y)) # fft outputs complex, so we find norm(y) here
     
-    incident_max = max(y[1:60]) # remove starting signal at 0hz
+    incident_max = max(y[1:60]) # remove 0hz and other high frequencies
     incident_max_index = y.index(incident_max)
     y = np.array(y)
     
-    y0 = y.copy()
-    y0[incident_max_index] = 0
+    # perform inverse fast fourier transform without primary signal
+    y0 = y.copy() # copy because Python variables are pointers
+    # "zeroing out" could cause issues, essentially like noise-cancelling headphones,
+    #   introduces inverted signal which could resurface
+    y0[incident_max_index] = 0 # zero out primary signal
     x0 = ifft(y0)
     x0 = list(map(abs, x0))
     
@@ -43,6 +50,12 @@ def get_incident_data(elevations):
 
 
 if __name__ == "__main__":
+    # # this code prints out plots of elevations time histories and fourier transforms
+    # #     in the following format:
+    # #
+    # # (Elevations History)       (Elevations History with dominant signal removed)
+    # # (Fourier Transform)       (Fourier Transform with dominant signal removed)
+    # 
     # elevations = get_elevations("../data/2016-06-29_T5/TR5-R3.00A1V.csv", 3)
     # x = np.array(elevations)
     # y = fft(x)
@@ -61,6 +74,7 @@ if __name__ == "__main__":
     # plt.show()
     
     # scan all T5 runs
+    # this is derivative of the file-traversing code in ventilation.py
     for filename in os.listdir("../data/2016-06-29_T5"):
         if filename != "Thumbs.db":
             data_path = "../data/2016-06-29_T5/" + filename

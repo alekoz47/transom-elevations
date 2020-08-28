@@ -4,6 +4,8 @@ import os
 from elevations_utils import get_elevations
 
 def slice_video(video_path):
+    """ Slices any video into 1500 frames """
+    # TODO: error handling in case 1500 frames not possible
     vidcap = cv2.VideoCapture(video_path)
     success,image = vidcap.read()
     
