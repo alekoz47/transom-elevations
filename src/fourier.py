@@ -5,7 +5,7 @@ import numpy as np
 import os
 import re
 import math
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
 def get_elevations_from_data(data_path, buttock):
     """Find elevations for given run at given buttock"""

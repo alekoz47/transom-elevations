@@ -3,7 +3,6 @@ import os
 import csv
 import re
 import math
-import numpy as np
 
 def get_ventilation(data_path):
     """Find average ventilation factor for given run"""
